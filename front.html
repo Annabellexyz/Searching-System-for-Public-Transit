@@ -1,0 +1,632 @@
+<!--=========公交查询start========-->
+
+{if $allline}
+<table width="620" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="ADCCEA">
+  <tr>
+    <td height="30" colspan="7" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:12px;padding-right:12px">
+     <div style="float:left;">所有公交线路如下</div>
+     <div style="float:right;">
+      <a href='edit.php?bus=0' target='_blank'></a></div>
+    </td>
+  </tr>
+  
+  {loop $lines $i $line}
+  {if $i%$cols==0}<tr>{/if}
+   <td width="92" height="36" bgcolor="#FFFFFF" class="font2" align="center">
+     <a href='?bus={urlencode($line[name])}' title='更新时间{$line[updatetime]}' target='_blank'>{$line[name]}</a>
+   </td>
+  {if $i%$cols==($cols-1)}</tr>{/if}
+  {/loop}
+ 
+</table>
+
+{elseif $isstation} <!-- 站点查询 -->
+<table width="620" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="ADCCEA">
+  <tr>
+    <td height="30" colspan="7" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:12px;padding-right:12px">
+     <div style="float:left;">公交查询结果</div>
+     <div style="float:right;">
+      <a href='edit.php?bus=0' target='_blank'></a></div>
+    </td>
+  </tr>
+</table>
+      {if $ismore}
+      <table cellspacing="0" cellpadding="0" width="620">
+       <tr valign="middle">
+        <td height="30" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:10px;padding-right:10px">
+            <span>相关站点信息：</span>
+        </td>   
+       </tr>
+       <tr>
+         <td style="padding-left:5px;">
+         <table cellspacing="1" cellpadding="10" border="0" style="background-color: #6699cc;">
+         {loop $stations $i $stat}
+         {if $i%$cols==0}<tr align="center" valign="middle" style="background-color:#ffffff;">{/if}
+          <td class="link-fontindex" align="center" style="width:124px;">
+                <a href='?st={urlencode($stat[stationname])}' target='_blank'>{$stat[stationname]}({$stat[stroad]})</a></td>
+         {if $i%$cols==($cols-1)}</tr>{/if}
+         {/loop}
+         </table>
+         </td>
+        </tr>
+      </table>      
+      {/if}
+      {if $isfind}
+      <table cellspacing="0" cellpadding="0" width="620">
+       <tr valign="middle">
+        <td height="30" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:10px;padding-right:10px">
+            <span>经过 <strong><font color='ff6600'>{$st}</font></strong>  站点的公交信息：</span>
+        </td>   
+       </tr>
+       <tr>
+         <td style="padding-left:5px;">
+         <table cellspacing="1" cellpadding="10" border="0" style="background-color: #6699cc;">
+           <tr align="center" valign="middle" bgcolor="#DEF1FF">
+             <td class="link-fontindex" width="90"><strong><font color="#0033CC">公交路线</font></strong></td>
+             <td class="link-fontindex" width="130"><strong><font color="#0033CC">公交信息</font></strong></td>
+             <td class="link-fontindex" width="300"><strong><font color="#0033CC">途经站点</font></strong></td>
+             <td class="link-fontindex" width="100"><strong><font color="#0033CC">途经道路</font></strong></td>
+          </tr>
+          {loop $lines $i $line}
+          <tr align="center" valign="top" bgcolor="#FFFFFF">
+<td class="link-fontindex" width="90">
+<a href='?bus={urlencode($line[name])}' title='{$line[name]}'>
+<strong>{$line[name]}</strong></a><br />更新于：<br />{$line[updatetime]}<br />
+<br /><br /><br />
+<div valign='bottom' class="link-fontindex">备注：{$remarks}</div>
+</td>
+<td class="link-fontindex" width="130" align="left">
+<font color="red">起点：</font><a href="?st={urlencode($line[att1])}">{$line[att1]}</a><br>
+<font color="red">终点：</font><a href="?st={urlencode($line[att2])}">{$line[att2]}</a><br>
+<font color="red">其它信息：</font><br>{$line[attribute]}
+</td>
+<td class="link-fontindex" width="300" align="left">
+{loop get_stations($line[id]) $i $stat}
+{if $i <= get_maxSequence($line[id])-2 }
+<a href='?st={urlencode($stat[stationname])}'>
+{if $stat[symbol]==1}  <!-- 往程单边 -->
+
+{if $stat[stationname]==$st}
+<strong> <font color='#CC0000'>+</font> <font color='red'>{$stat[stationname]}({$stat[stroad]}) </font></strong>
+{else}
+<font color='#CC0000'>+</font> {$stat[stationname]}({$stat[stroad]})
+{/if}
+
+{elseif $stat[symbol]==2}  <!-- 返程单边 -->
+
+{if $stat[stationname]==$st}
+<strong> <font color='#CC0000'>-</font><font color='red'> {$stat[stationname]}({$stat[stroad]}) </font></strong>
+{else}
+<font color='#CC0000'>-</font> {$stat[stationname]}({$stat[stroad]})
+{/if}
+
+{else}                       <!-- 双向 -->
+
+{if $stat[stationname]==$st}
+<strong><font color='red'> {$stat[stationname]}({$stat[stroad]}) </font></strong>
+{else}
+{$stat[stationname]}({$stat[stroad]})
+{/if}
+{/if}
+</a>→
+{else}
+<a href='?st={urlencode($stat[stationname])}'>
+{if $stat[symbol]==1}  <!-- 往程单边 -->
+
+{if $stat[stationname]==$st}
+<strong> <font color='#CC0000'>+</font><font color='red'> {$stat[stationname]}({$stat[stroad]}) </font></strong>
+{else}
+<font color='#CC0000'>+</font> {$stat[stationname]}({$stat[stroad]})
+{/if}
+
+{elseif $stat[symbol]==2}  <!-- 返程单边 -->
+
+{if $stat[stationname]==$st}
+<strong> <font color='#CC0000'>-</font><font color='red'> {$stat[stationname]}({$stat[stroad]}) </font></strong>
+{else}
+<font color='#CC0000'>-</font> {$stat[stationname]}({$stat[stroad]})
+{/if}
+
+{else}                       <!-- 双向 -->
+
+{if $stat[stationname]==$st}
+<strong><font color='red'> {$stat[stationname]}({$stat[stroad]}) </font></strong>
+{else}
+{$stat[stationname]}({$stat[stroad]})
+{/if}
+{/if}
+</a>
+{/if}
+{/loop} 
+             
+             </td>
+<td class="link-fontindex" width="100" align="left">
+{if is_bool(strpos($line[road],$st))}
+{$line[road]}
+{else}
+{str_replace($st,"<strong><font color=red>$st</font></strong>",$line[road])}
+{/if}
+</td>
+          </tr>    
+          {/loop}
+	       </table>
+          </td>
+        </tr> 
+      </table>
+<table width="620" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="ADCCEA">
+  <tr>
+    <td height="30" bgcolor="ECF5FF" class="font14 STYLE2" align="right">
+     {$pagehtml}    
+    </td>
+  </tr>
+</table>
+      {/if}            
+      {if ($isfind==false) && ($ismore==false)}
+      <table cellspacing="0" cellpadding="0" width="620">
+       <tr valign="middle">
+        <td height="30" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:10px;padding-right:10px">
+            <span>没找到相关站点，请使用其它站点名查询</span>
+        </td>   
+       </tr>       
+      </table>
+      {/if}
+      
+{elseif $isline} <!-- 路线查询 -->
+<table width="620" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="ADCCEA">
+  <tr>
+    <td height="30" colspan="7" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:12px;padding-right:12px">
+     <div style="float:left;">公交查询结果</div>
+     <div style="float:right;">
+      <a href='edit.php?bus=0' target='_blank'></a></div>
+    </td>
+  </tr>
+</table>
+
+      {if $ismore}
+      <table cellspacing="0" cellpadding="0" width="620">
+       <tr valign="middle">
+        <td height="30" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:10px;padding-right:10px">
+            <span>相关路线信息：</span>
+        </td>   
+       </tr>
+       <tr>
+         <td style="padding-left:5px;">
+         <table cellspacing="1" cellpadding="10" border="0" style="background-color: #6699cc;">
+         {loop $lines $i $line}
+         {if $i%$cols==0}<tr align="center" valign="top" style="background-color:#ffffff;">{/if}
+          <td class="link-fontindex" align="center" style="width:103px;">
+                <a href='?bus={urlencode($line[name])}' title='更新时间{$line[updatetime]}' target='_blank'>{$line[name]}</a></td>
+         {if $i%$cols==($cols-1)}</tr>{/if}
+         {/loop}
+         </table>
+         </td>
+        </tr>
+      </table>
+      {/if}
+      {if $isfind}
+      <table cellspacing="0" cellpadding="0" width="620">
+       <tr valign="middle">
+        <td height="30" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:10px;padding-right:10px">
+            <span>{$bus}公交路线信息：</span>
+        </td>   
+       </tr>       
+       <tr>
+         <td style="padding-left:5px;">
+         <table cellspacing="1" cellpadding="10" border="0" style="background-color: #6699cc;">
+           <tr align="center" valign="top" bgcolor="#DEF1FF">
+<td class="link-fontindex" width="90"><strong><font color="#0033CC">公交路线</font></strong></td>
+<td class="link-fontindex" width="130"><strong><font color="#0033CC">公交信息</font></strong></td>
+<td class="link-fontindex" width="300"><strong><font color="#0033CC">途经站点</font></strong></td>
+<td class="link-fontindex" width="100"><strong><font color="#0033CC">途经道路</font></strong></td>
+	  </tr>
+          <tr align="center" valign="top" bgcolor="#FFFFFF">
+<td class="link-fontindex" width="90">
+<a href='?bus={urlencode($name)}' title='{$name}'>
+<strong>{$name}</strong></a><br />更新于：<br />{$updatetime}<br />
+<br /><br /><br />
+<div valign='bottom' class="link-fontindex">备注：{$remarks}</div>
+</td>
+<td class="link-fontindex" width="130" align="left">
+<font color="red">起点：</font><a href="?st={urlencode($att1)}">{$att1}</a><br>
+<font color="red">终点：</font><a href="?st={urlencode($att2)}">{$att2}</a><br>
+<font color="red">其它信息：</font><br>{$attribute}
+</td>
+<td class="link-fontindex" width="300" align="left">
+
+{loop $stations $i $stat}
+{if $i <= $all-2 }
+<a href='?st={urlencode($stat[stationname])}'>
+{if $stat[symbol]==1}  <!-- 往程单边 -->
+<font color='#CC0000'>+</font> {$stat[stationname]}({$stat[stroad]}) 
+{elseif $stat[symbol]==2}  <!-- 返程单边 -->
+<font color='#CC0000'>-</font> {$stat[stationname]}({$stat[stroad]})
+{else}                     <!-- 双向 -->
+{$stat[stationname]}({$stat[stroad]})
+{/if}
+</a>→
+
+{else}
+
+<a href='?st={urlencode($stat[stationname])}'>
+{if $stat[symbol]==1}  <!-- 往程单边 -->
+<font color='#CC0000'>+</font> {$stat[stationname]}({$stat[stroad]})
+{elseif $stat[symbol]==2}  <!-- 返程单边 -->
+<font color='#CC0000'>-</font> {$stat[stationname]}({$stat[stroad]})
+{else}                     <!-- 双向 -->
+{$stat[stationname]}({$stat[stroad]})
+{/if} 
+</a>
+{/if}
+{/loop} 
+</td>
+<td class="link-fontindex" width="100" align="left">{$road}</td>
+</tr>    
+        
+         </table>
+         </td>
+        </tr>
+      </table>
+      {/if}
+      {if ($isfind==false) && ($ismore==false)}
+      <table cellspacing="0" cellpadding="0" width="620">
+       <tr valign="middle">
+        <td height="30" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:10px;padding-right:10px">
+            <span>没找到相关线路，请使用其它关键词查询</span>
+        </td>   
+       </tr>       
+      </table>
+      {/if}
+      
+{else} <!-- 站站查询 -->
+   
+<table width="620" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="ADCCEA">
+  <tr>
+    <td height="30" colspan="7" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:12px;padding-right:12px">
+     <div style="float:left;">公交查询结果</div>
+     <div style="float:right;">
+      <a href='edit.php?bus=0' target='_blank'></a></div>
+    </td>
+  </tr>
+</table>    
+
+      {if $isfind}
+      <table cellspacing="0" cellpadding="0" width="620">
+       <tr valign="middle">
+        <td height="30" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:12px;padding-right:12px">
+            <span>从 <strong><font color='ff6600'>{$s1}</font></strong> 到 <strong><font color='ff6600'>{$s2}</font></strong>  的公交信息：</span>
+        </td>   
+       </tr>       
+       <tr>
+         <td style="padding-left:5px;">        
+         <table cellspacing="1" cellpadding="10" border="0" style="background-color: #6699cc;">
+           <tr align="center" valign="top" bgcolor="#DEF1FF">
+             <td class="link-fontindex" width="90"><strong><font color="#0033CC">公交路线</font></strong></td>
+             <td class="link-fontindex" width="130"><strong><font color="#0033CC">公交信息</font></strong></td>
+             <td class="link-fontindex" width="300"><strong><font color="#0033CC">途经站点</font></strong></td>
+             <td class="link-fontindex" width="100"><strong><font color="#0033CC">途经道路</font></strong></td>
+          </tr>
+          {loop $lines $i $line}
+          <tr align="center" valign="top" bgcolor="#FFFFFF">
+<td class="link-fontindex" width="90">
+<a href='?bus={urlencode($line[name])}' title='{$line[name]}'>
+<strong>{$line[name]}</strong></a><br />更新于：<br />{$line[updatetime]}<br />
+<br /><br /><br />
+<div valign='bottom'><a href='edit.php?bus={$line[ID]}' target='_blank'><font color='#CC0000'>【我来完善】</font></a>
+</div><br />
+{if $line[editor]}
+感谢 <font color="red"> {$line[editor]} </font> 的编辑
+{/if}
+</td>
+<td class="link-fontindex" width="130" align="left">
+<font color="red">起点：</font><a href="?st={urlencode($line[att1])}">{$line[att1]}</a><br>
+<font color="red">终点：</font><a href="?st={urlencode($line[att2])}">{$line[att2]}</a><br>
+<font color="red">其它信息：</font><br>{$line[attribute]}</td>
+             <td class="link-fontindex" width="300" align="left">
+{loop get_stations($line[id]) $i $stat}
+{if $i <= get_maxSequence($line[id])-2 } <!-- 非最后一个站点的 -->
+
+<a href='?st={urlencode($stat[stationname])}'>
+{if $stat[symbol]==1}  <!-- 往程单边 -->
+
+{if $stat[stationname]==$s1}
+<strong><font color='red'> {$stat[stationname]}({$stat[stroad]})(往) </font></strong>
+{elseif $stat[stationname]==$s2}
+<strong><font color='red'> {$stat[stationname]}({$stat[stroad]})(往) </font></strong>
+{else}
+{$stat[stationname]}({$stat[stroad]})(往)
+{/if}
+
+{elseif $stat[symbol]==2}  <!-- 返程单边 -->
+
+{if $stat[stationname]==$s1}
+<strong><font color='red'> {$stat[stationname]}({$stat[stroad]})(返) </font></strong>
+{elseif $stat[stationname]==$s2}
+<strong><font color='red'> {$stat[stationname]}({$stat[stroad]})(返) </font></strong>
+{else}
+{$stat[stationname]}({$stat[stroad]})(返)
+{/if}
+
+{else}                       <!-- 双向 -->
+
+{if $stat[stationname]==$s1}
+<strong><font color='red'> {$stat[stationname]}({$stat[stroad]}) </font></strong>
+{elseif $stat[stationname]==$s2}
+<strong><font color='red'> {$stat[stationname]}({$stat[stroad]}) </font></strong>
+{else}
+{$stat[stationname]}({$stat[stroad]})
+{/if}
+{/if}
+</a>→
+
+{else}
+
+<a href='?st={urlencode($stat[stationname])}'>
+{if $stat[symbol]==1}  <!-- 往程单边 -->
+
+{if $stat[stationname]==$s1}
+<strong><font color='red'> {$stat[stationname]}({$stat[stroad]})(往) </font></strong>
+{elseif $stat[stationname]==$s2}
+<strong><font color='red'> {$stat[stationname]}({$stat[stroad]})(往) </font></strong>
+{else}
+{$stat[stationname]}({$stat[stroad]})(往)
+{/if}
+
+{elseif $stat[symbol]==2}  <!-- 返程单边 -->
+
+{if $stat[stationname]==$s1}
+<strong><font color='red'> {$stat[stationname]}({$stat[stroad]})(返) </font></strong>
+{elseif $stat[stationname]==$s2}
+<strong><font color='red'> {$stat[stationname]}({$stat[stroad]})(返) </font></strong>
+{else}
+{$stat[stationname]}({$stat[stroad]})(返)
+{/if}
+
+{else}                       <!-- 双向 -->
+
+{if $stat[stationname]==$s1}
+<strong><font color='red'> {$stat[stationname]}({$stat[stroad]}) </font></strong>
+{elseif $stat[stationname]==$s2}
+<strong><font color='red'> {$stat[stationname]}({$stat[stroad]}) </font></strong>
+{else}
+{$stat[stationname]}({$stat[stroad]})
+{/if}
+{/if}
+</a>
+{/if}
+
+{/loop} 
+             
+             </td>
+<td class="link-fontindex" width="100" align="left">
+{$line[road]}
+</td>
+          </tr>    
+          {/loop}
+	       </table>
+         </td>
+      </tr> 
+      </table>
+<table width="620" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="ADCCEA">
+  <tr>
+    <td height="30" bgcolor="ECF5FF" class="font14 STYLE2" align="right">
+     {$pagehtml}    
+    </td>
+  </tr>
+</table>
+      {elseif $istwo}  <!-- 转车方案 -->
+
+      {if $isturn}
+<table width="620" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td height="8"></td>
+  </tr>
+  <tr valign="middle">
+        <td height="30" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:12px;padding-right:12px">
+            <span>没有从 <strong><font color='ff6600'>{$s1}</font></strong> 到 <strong><font color='ff6600'>{$s2}</font></strong>  的直达车，转车方案如下：</span>
+        </td>   
+  </tr> 
+{if $is_s1_links}
+<tr valign="middle">
+  <td height="30" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:12px;padding-right:12px">
+<span style="width:10px;"> </span> <font color='ff6600'>{$s1}</font>相近站乘车：
+{loop $s1_links $st}
+<a href="index.php?s1={urlencode($st[stationname])}&s2={urlencode($s2)}" target="_blank">{$st[stationname]}</a>  &nbsp;
+{/loop}
+</td></tr>       
+{/if}
+
+{if $is_s2_links}
+<tr valign="middle">
+  <td height="30" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:12px;padding-right:12px">
+<span style="width:10px;"> </span> <font color='ff6600'>{$s2}</font>相近站乘车：
+{loop $s2_links $st}
+<a href="index.php?s1={urlencode($s1)}&s2={urlencode($st[stationname])}" target="_blank">{$st[stationname]}</a>  &nbsp;
+{/loop}
+</td></tr>       
+{/if}
+</table>
+<table cellspacing="1" cellpadding="10" border="0" style="border-width:0px;background-color: #6699cc;">
+<tr align="center" valign="top" style="background-color:#DEF1FF;">
+<td class="link-fontindex" width=100px><strong><font color="#0033CC">第一趟公车</font></strong></td>
+<td class="link-fontindex" width=80px><strong><font color="#0033CC">经过站点数</font></strong></td>
+<td class="link-fontindex" width=150px><strong><font color="#0033CC">换乘站点</font></strong></td>
+<td class="link-fontindex" width=100px><strong><font color="#0033CC">第二趟公车</font></strong></td>
+<td class="link-fontindex" width=80px><strong><font color="#0033CC">经过站点数</font></strong></td>
+<td class="link-fontindex" width=80px><strong><font color="#0033CC">总站点数</font></strong></td>
+</tr>
+{loop $ways $tn}
+<tr align="center" valign="top" style="background-color:#FFFFFF;">
+<td class="link-fontindex" width=100px>
+<a href="?bus={urlencode($tn[name1])}" target="_blank">{$tn[name1]}</a></td>
+<td class="link-fontindex" width=80px>{$tn[count1]}</td>
+<td class="link-fontindex" width=150px>
+<a href="?st={urlencode($tn[stationname])}" target="_blank">{$tn[stationname]}</a></td>
+<td class="link-fontindex" width=100px>
+<a href="?bus={urlencode($tn[name2])}" target="_blank">{$tn[name2]}</a></td>
+<td class="link-fontindex" width=80px>{$tn[count2]}</td>
+<td class="link-fontindex" width=80px>{$tn[count]}</td>
+</tr>
+{/loop}
+</table>
+      {else}
+      <table cellspacing="0" cellpadding="0" width="620">
+       <tr valign="middle">
+        <td height="30" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:10px;padding-right:10px">            
+          <span>没有从 {$s1} 到 {$s2} 的转车方案，请确认你的查询是否正确!</span>
+         </td>    
+        </tr>
+      </table>
+      <table width="620" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="ADCCEA">       
+{if $is_s1_links}
+<tr valign="middle">
+  <td height="30" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:12px;padding-right:12px">
+<span style="width:10px;"> </span> <font color='ff6600'>{$s1}</font>相近站乘车：
+{loop $s1_links $st}
+<a href="index.php?s1={urlencode($st[stationname])}&s2={urlencode($s2)}" target="_blank">{$st[stationname]}</a>  &nbsp;
+{/loop}
+</td></tr>       
+{/if}
+
+{if $is_s2_links}
+<tr valign="middle">
+  <td height="30" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:12px;padding-right:12px">
+<span style="width:10px;"> </span> <font color='ff6600'>{$s2}</font>相近站乘车：
+{loop $s2_links $st}
+<a href="index.php?s1={urlencode($s1)}&s2={urlencode($st[stationname])}" target="_blank">{$st[stationname]}</a>  &nbsp;
+{/loop}
+</td></tr>       
+{/if}    
+      </table>
+      {/if}<br>
+
+{if $is_changeBus}
+<h4 align="center">公车走路换乘方案</h4>
+<table cellspacing="1" cellpadding="10" border="0" style="border-width:0px;background-color: #6699cc;">
+<tr align="center" valign="top" style="background-color:#DEF1FF;">
+<td class="link-fontindex" width=90px><strong><font color="#0033CC">第一趟车</font></strong></td>
+<td class="link-fontindex" width=145px><strong><font color="#0033CC">下车站点</font></strong></td>
+<td class="link-fontindex" width=60px><strong><font color="#0033CC">站点数</font></strong></td>
+<td class="link-fontindex" width=145px><strong><font color="#0033CC">换乘站点</font></strong></td>
+<td class="link-fontindex" width=90px><strong><font color="#0033CC">第二趟车</font></strong></td>
+<td class="link-fontindex" width=60px><strong><font color="#0033CC">站点数</font></strong></td>
+<td class="link-fontindex" width=70px><strong><font color="#0033CC">总站点数</font></strong></td>
+</tr>
+{loop $changeBus $i $j}
+<tr align="center" valign="top" style="background-color:#FFFFFF;">
+<td class="link-fontindex">
+<a href="?bus={urlencode($j[0])}" target="_blank">{$j[0]}</a></td>
+<td class="link-fontindex">
+<a href="?st={urlencode($j[1])}" target="_blank">{$j[1]}</a></td>
+<td class="link-fontindex">{$j[2]}</td>
+<td class="link-fontindex">
+<a href="?st={urlencode($j[3])}" target="_blank">{$j[3]}</a></td>
+<td class="link-fontindex">
+<a href="?bus={urlencode($j[4])}" target="_blank">{$j[4]}</a></td>
+<td class="link-fontindex">{$j[5]}</td>
+<td class="link-fontindex">{$j[6]}</td>
+</tr>
+{/loop}
+</table>
+{/if}
+
+
+
+      {else}
+{if $is_s2_stat}
+<table width="620" align="center" cellpadding="0" cellspacing="1">
+       <tr valign="middle">
+        <td height="30" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:12px;padding-right:12px">
+            <span>你是不是要查找以下路线：</span>
+        </td>   
+       </tr>
+<tr>
+  <td style="padding-left:5px;height: 38px">
+  <table cellspacing="1" cellpadding="10" style="border-width:0px;background-color: #6699cc;">
+    {loop $s2_stat $i $stat}
+{if $i%3==0}<tr align="center" valign="top" style="background-color:#ffffff;">{/if}
+<td align="center" style="width:206px;">
+{if $stat[stationname]!=''}
+<a href='index.php?s1={urlencode($s1)}&s2={urlencode($stat[stationname])}'> {$s1} -- {$stat[stationname]}({$stat[stroad]})</a></td>
+{/if}
+{if $i%3==2}</tr>{/if}
+{/loop}    
+  </table>
+  </td>
+</tr>
+</table>
+{/if}
+
+{if $is_s1_stat}
+<table width="620" align="center" cellpadding="0" cellspacing="1">
+       <tr valign="middle">
+        <td height="30" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:12px;padding-right:12px">
+            <span>你是不是要查找以下路线：</span>
+        </td>   
+       </tr>
+<tr>
+  <td style="padding-left:5px;height: 38px">
+  <table cellspacing="1" cellpadding="10" style="border-width:0px;background-color: #6699cc;">
+    {loop $s1_stat $i $stat}
+{if $i%3==0}<tr align="center" valign="top" style="background-color:#ffffff;">{/if}
+<td align="center" style="width:206px;">
+{if $stat[stationname]!=''}
+<a href='index.php?s1={urlencode($stat[stationname])}&s2={urlencode($s2)}'>{$stat[stationname]}({$stat[stroad]}) -- {$s2}</a></td>
+{/if}
+{if $i%3==2}</tr>{/if}
+{/loop}    
+  </table>
+  </td>
+</tr>
+</table>
+{/if}
+
+{if $isRelative}
+ <table cellspacing="0" cellpadding="0" width="620">
+  <tr valign="middle">
+   <td height="30" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:10px;padding-right:10px">            
+          <span>请确保起点站和终点其中一个是正确的，以方便您获取需要的信息！</span>
+   </td>    
+</tr>
+</table>
+<table cellspacing="0" cellpadding="0" width="620">
+<tr valign="top">
+  <td>
+  <table width="310" cellspacing="1" cellpadding="10" style="border-width:0px;background-color: #6699cc;">
+  <tr align="center" valign="top" style="background-color:#DEF1FF;">
+  <td class="link-fontindex"><strong><font color="#0033CC">与起点相近似的站点</font></strong></td></tr>
+  {loop $s1_stat $stat}
+  <tr align="center" style="background-color:#ffffff;">
+  <td class="link-fontindex" height="30"><a href='?st={urlencode($stat[stationname])}' target="_blank"> {$stat[stationname]}({$stat[stroad]}) </a></td>
+  </tr>
+  {/loop}
+  </table>
+  </td>
+  <td>
+  <table width="310" cellspacing="1" cellpadding="10" style="border-width:0px;background-color: #6699cc;">
+  <tr align="center" valign="top" style="background-color:#DEF1FF;">
+  <td class="link-fontindex"><strong><font color="#0033CC">与终点相近似的站点</font></strong></td></tr>
+  {loop $s2_stat $stat}
+  <tr align="center" style="background-color:#ffffff;">
+  <td class="link-fontindex" height="30"><a href='?st={urlencode($stat[stationname])}' target="_blank"> {$stat[stationname]}({$stat[stroad]}) </a></td>
+  </tr>
+  {/loop}
+  </table>
+  </td>
+</tr>
+</table>
+{/if}
+{if $isnone}
+ <table cellspacing="0" cellpadding="0" width="620">
+  <tr valign="middle">
+   <td height="30" bgcolor="ECF5FF" class="font14 STYLE2" style="padding-left:10px;padding-right:10px">            
+          <span>找不到相关路线信息，请确保输入无误！</span>
+   </td>    
+</tr>
+</table>
+{/if}
+
+      {/if} 
+      
+{/if}
+   	
+<!--=========公交查询end========-->
